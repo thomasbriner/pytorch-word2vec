@@ -24,7 +24,7 @@ def main():
     parser.add_argument('wordsim', type=str)
     parser.add_argument('--output','-o', type=str)
     parser.add_argument('--dim', '-d', type=int, default=100)
-    parser.add_argument('--epoch', '-e', type=int, default=20)
+    parser.add_argument('--epoch', '-e', type=int, default=1)
     parser.add_argument('--batchsize', '-b', type=int, default=1024)
     parser.add_argument('--window', '-w', type=int, default=5)
     parser.add_argument('--negative', '-n', type=int, default=5)
@@ -68,6 +68,9 @@ def main():
             losses = []
         
     m.save_w2v(args.output)
+    torch.save(m.state_dict(), 'model_state.dump')
+    torch.save(m, 'model.dump')
+
 
 
 if __name__ == '__main__':

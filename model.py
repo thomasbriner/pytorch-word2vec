@@ -5,9 +5,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from torchutils.utils import timer
+#from torchutils.utils import timer
 
-t = timer.get_instance()
+# python train.py bla.txt wordsim_tab_set2.txt -o result --batchsize 1
+
+#t = timer.get_instance()
 
 class CBoW(nn.Module):
     def __init__(self, n_vocab, dim=100):
@@ -32,10 +34,10 @@ class CBoW(nn.Module):
         with open(path, 'w') as f:
             f.write('{} {}\n'.format(*emb.shape))
 
-            for word, wid in self.word2id.items():
-                vec = emb[wid]
-
-                f.write('{} {}\n'.format(word, ' '.join('{:.6f}'.format(v) for v in vec)))
+            # for word, wid in self.word2id.items():
+            #     vec = emb[wid]
+            #
+            #     f.write('{} {}\n'.format(word, ' '.join('{:.6f}'.format(v) for v in vec)))
 
     def eval_sim(self, wordsim):
         emb = np.array(self.center_embed.weight.data)
@@ -60,20 +62,51 @@ class CBoW(nn.Module):
 
         # context_vec: (batchsize, dim)
         context_vec = torch.sum(context_emb, dim=1)
+        print('*******************')
+        print('cbow')
+        print('*******************')
+
+
+        print('center_emb')
+ #       print(center_emb)
+        print(center_emb.shape)
+
+        print('context_emb')
+#        print(context_emb)
+        print(context_emb.shape)
+
+        print('negative_emb')
+  #      print(negative_emb)
+
+        print(negative_emb.shape)
+
 
         # emb: (batchsize, negative + 1, dim)
         emb = torch.cat((center_emb.unsqueeze(1), -negative_emb), dim=1)
+
+        print('emb')
+        #        print(context_emb)
+        print(emb.shape)
+
+
         
         # score: (batchsize, negative + 1)
         score = torch.bmm(emb, context_vec.unsqueeze(2)).squeeze(2)
+        print('score')
+        print(score)
+        print(score.shape)
 
         # score: (batchsize, negative + 1)
         loss = -torch.mean(F.logsigmoid(score))
+        print('loss')
+        print(loss)
+        print(loss.shape)
 
         return loss
 
     def sg(self, center, contexts, negatives):
         # center_emb: (batchsize, dim)
+
         # context_emb: (batchsize, context_len, dim)
         # negative_emb: (batchsize, negative, dim)
         center_emb = self.center_embed(center)
